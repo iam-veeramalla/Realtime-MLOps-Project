@@ -7,56 +7,57 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  S3_BUCKET: churn-model-bucket-cicd-abhi
+  S3_BUCKET: churn-model-bucket-cicd-obaid
 
 jobs:
   train-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to push commits
-    
+      contents: write # Required to push commits
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # Use built-in token
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-    
-    - name: Generate dataset
-      run: python generate_data.py
-    
-    - name: Train model
-      run: python train.py
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Push model to S3 directly
-      run: |
-        aws s3 cp models/churn_model.pkl s3://churn-model-bucket-cicd-abhi/models/churn_model.pkl
-        echo "Model pushed to S3 is success"
-    
-    - name: Update inference.yaml with S3 model path
-      run: |
-        MODEL_URI="s3://churn-model-bucket-cicd-abhi/models/churn_model.pkl"
-        sed -i "s|storageUri: .*|storageUri: $MODEL_URI|g" k8s/inference.yaml
-    
-    - name: Commit updated inference.yaml
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add k8s/inference.yaml
-        git commit -m "Update model S3 path [skip ci]" || echo "No changes"
-        git push || echo "No changes to push"
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Use built-in token
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Generate dataset
+        run: python generate_data.py
+
+      - name: Train model
+        run: python train.py
+
+
+      - name: Push model to S3 directly
+        run: |
+          aws s3 cp models/churn_model.pkl s3://churn-model-bucket-cicd-obaid/models/churn_model.pkl
+          echo "Model pushed to S3 is success"
+
+      - name: Update inference.yaml with S3 model path
+        run: |
+          MODEL_URI="s3://churn-model-bucket-cicd-obaid/models/churn_model.pkl"
+          sed -i "s|storageUri: .*|storageUri: $MODEL_URI|g" k8s/inference.yaml
+
+      - name: Commit updated inference.yaml
+        run: |
+          git config --local user.email "[EMAIL_ADDRESS]"
+          git config --local user.name "obaida7"
+          git add k8s/inference.yaml
+          git commit -m "Update model S3 path [skip ci]" || echo "No changes"
+          git push || echo "No changes to push"
