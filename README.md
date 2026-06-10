@@ -1,4 +1,4 @@
-# Churn Model MLOps Demo
+# Churn Model MLOps Demo #
 
 A simple demonstration of MLOps practices for a customer churn prediction model.
 
