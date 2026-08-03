@@ -75,7 +75,7 @@ python api.py
 # Visit http://localhost:8000/docs
 ```
 
-### 2. DVC Setup (Data Version Control)
+### 2. DVC(Data Version Control) Setup & push training data
 
 ```bash
 # Initialize DVC
@@ -85,15 +85,16 @@ dvc init
 dvc remote add -d myremote s3://my-bucket/churn-model
 
 # Track model with DVC
-dvc add models/churn_model.pkl
+dvc add data/churn_model.csv
 
 # Push to S3
 dvc push
 
 # Commit DVC metadata
-git add models/churn_model.pkl.dvc .dvc/ .gitignore
-git commit -m "Track model with DVC"
+git add data/churn_model.csv.dvc .dvc/ .gitignore
+git commit -m "Track traning data with DVC"
 ```
+The '.csv' data file will be stored under /files/md5/../..
 
 ### 3. Push Model to S3
 
@@ -106,10 +107,10 @@ export AWS_SECRET_ACCESS_KEY=your-secret
 export AWS_DEFAULT_REGION=us-east-1
 
 # Create S3 bucket
-aws s3 mb s3://my-bucket
+aws s3 mb s3://my-bucket/churn-model
 
-# Push model to S3 using DVC
-dvc push
+# Push model to S3 
+aws s3 cp models/churn_model.pkl s3://my-bucket/churn-model/models
 
 # Verify model is in S3
 aws s3 ls s3://my-bucket/churn-model/models/ --recursive
